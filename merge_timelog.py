@@ -83,6 +83,9 @@ def calcAmountTimeEntries(entries):
         end_time = entry[2].split(":")
         end_time = datetime.timedelta(hours=int(end_time[0]), minutes=int(end_time[1]))   
         duration = end_time - start_time
+        if duration <= datetime.timedelta(days=0, hours=0, minutes=0):
+            end_time += datetime.timedelta(days=1)
+            duration = end_time - start_time
         amount_entry_time += duration
     return amount_entry_time
 
