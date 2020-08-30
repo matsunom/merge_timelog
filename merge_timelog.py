@@ -1,3 +1,4 @@
+
 import os
 import datetime
 import sys
@@ -11,7 +12,7 @@ def getDayText(day):
     dt_today = datetime.date.today()
     if day == 'today':
         day_text = dt_today.strftime('%Y-%m-%d')
-    elif day == 'yesterday':
+    elif day == 'yesterday' or day == 'yesterday~':
         dt_yesterday = dt_today - datetime.timedelta(days=1)
         day_text = dt_yesterday.strftime('%Y-%m-%d')
     return day_text
@@ -19,13 +20,16 @@ def getDayText(day):
 # ファイル名の文字列を取得
 def getFname(day):
     dt_today = datetime.date.today()
+    dt_yesterday = dt_today - datetime.timedelta(days=1)
     if day == 'today':
         toggl_file = 'Toggl_time_entries_' + dt_today.strftime('%Y-%m-%d') + '_to_' + dt_today.strftime('%Y-%m-%d')
         trackingtime_file = 'TrackingTime ' + dt_today.strftime('%b %d,%Y') + '-' + dt_today.strftime('%b %d,%Y')
     elif day == 'yesterday':
-        dt_yesterday = dt_today - datetime.timedelta(days=1)
         toggl_file = 'Toggl_time_entries_' + dt_yesterday.strftime('%Y-%m-%d') + '_to_' + dt_yesterday.strftime('%Y-%m-%d')
         trackingtime_file = 'TrackingTime ' + dt_yesterday.strftime('%b %d,%Y') + '-' + dt_yesterday.strftime('%b %d,%Y')
+    elif day == 'yesterday~':
+        toggl_file = 'Toggl_time_entries_' + dt_yesterday.strftime('%Y-%m-%d') + '_to_' + dt_today.strftime('%Y-%m-%d')
+        trackingtime_file = 'TrackingTime ' + dt_yesterday.strftime('%b %d,%Y') + '-' + dt_today.strftime('%b %d,%Y')
     else:
         print('Please select today or yesterday.')
         sys.exit()
@@ -43,11 +47,12 @@ def readFile(fname):
     return entries
 
 def readToggl(lines):
-    entries = [[line.get('Description'), timeConvert_for_Toggl(line.get('Start time')), timeConvert_for_Toggl(line.get('End time'))] for line in lines]
+    entries = [[line.get('Description'), timeConvert_for_Toggl(line.get('Start time')), timeConvert_for_Toggl(line.get('End time')), datetime.datetime.strptime(line.get('Start date'), '%Y-%m-%d'), datetime.datetime.strptime(line.get('End date'), '%Y-%m-%d')] for line in lines]
     return entries
 
+# trackingtimeにはタスク終了時の日付が見つからないないためスタートと同じ日付をいれる
 def readTrackingTime(lines):
-    entries = [[line.get('Task'), timeConvert_for_TrackingTime(line.get('From')), timeConvert_for_TrackingTime(line.get('To'))] for line in lines]
+    entries = [[line.get('Task'), timeConvert_for_TrackingTime(line.get('From')), timeConvert_for_TrackingTime(line.get('To')), datetime.datetime.strptime(line.get('Date'), '%m/%d/%Y'), datetime.datetime.strptime(line.get('Date'), '%m/%d/%Y')] for line in lines]
     return entries
 
 def timeConvert_for_Toggl(time_text):
@@ -69,6 +74,7 @@ def take_second(elem):
     return elem[1]
 
 def writeFile(fname, entries):
+    entries = [entry[:3] for entry in entries]
     with open(fname, 'w') as output_csv:
         header = ['Name', 'From', 'To']
         writer = csv.writer(output_csv)
@@ -76,7 +82,7 @@ def writeFile(fname, entries):
         writer.writerows(entries)
 
 def calcAmountTimeEntries(entries):
-    amount_entry_time = datetime.timedelta(hours=0, minutes=0) # 初期化
+    amount_entry_time = datetime.timedelta(days=0, hours=0, minutes=0) # 初期化
     for entry in entries:
         start_time = entry[1].split(":")
         start_time = datetime.timedelta(hours=int(start_time[0]), minutes=int(start_time[1]))
@@ -98,7 +104,7 @@ def main():
         sys.exit()
     # get file name today or yesterday
     fnames = getFname(which_day)
-    dirpath = '' # 絶対パス　'/Users/username/Downloads/'
+    dirpath = '/Users/username/Downloads/'
     matchpath = dirpath + '*.csv'
     csv_names = glob.glob(matchpath)
     fpaths = []
@@ -115,7 +121,7 @@ def main():
         entries.extend(readFile(fpath))
 
     # エントリーを from をキーにして並び替える
-    entries.sort(key=lambda x: x[1])
+    entries.sort(key=lambda x: (x[3], x[1]))
 
     output_file = dirpath + 'TimeLog_' + getDayText(which_day) + '.csv'
     

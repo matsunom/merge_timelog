@@ -18,3 +18,11 @@ Name of log file.
 `file created: /Users/username/Downloads/TimeLog_2020-08-26.csv`
 
 Before you use this script, you need to change dirpath on 98th line in merge_timelog.py.
+
+# command args
+`python merge_timelog.py today`
+This option search log files in dirpath the period between today to today.
+`python merge_timelog.py yesterday`
+This option search log files in dirpath the period between yesterday to yesterday.
+`python merge_timelog.py yesterday`
+This option search log files in dirpath the period between yesterday to today.
