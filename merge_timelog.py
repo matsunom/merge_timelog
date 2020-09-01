@@ -47,7 +47,10 @@ def readFile(fname):
     return entries
 
 def readToggl(lines):
-    entries = [[line.get('Description'), timeConvert_for_Toggl(line.get('Start time')), timeConvert_for_Toggl(line.get('End time')), datetime.datetime.strptime(line.get('Start date'), '%Y-%m-%d'), datetime.datetime.strptime(line.get('End date'), '%Y-%m-%d')] for line in lines]
+    try:
+        entries = [[line.get('Description'), timeConvert_for_Toggl(line.get('Start time')), timeConvert_for_Toggl(line.get('End time')), datetime.datetime.strptime(line.get('Start date'), '%Y-%m-%d'), datetime.datetime.strptime(line.get('End date'), '%Y-%m-%d')] for line in lines]
+    except ValueError:
+        entries = [[line.get('Description'), timeConvert_for_Toggl(line.get('Start time')), timeConvert_for_Toggl(line.get('End time')), datetime.datetime.strptime(line.get('Start date'), '%Y/%m/%d'), datetime.datetime.strptime(line.get('End date'), '%Y/%m/%d')] for line in lines]
     return entries
 
 # trackingtimeにはタスク終了時の日付が見つからないないためスタートと同じ日付をいれる
@@ -69,13 +72,12 @@ def timeConvert_for_TrackingTime(time_text):
     time = str(time_h) + ":" + time_m
     return time
 
-# take the second element for sort
-def take_second(elem):
-    return elem[1]
-
-def writeFile(fname, entries):
+def writeFile(fname, entries, encoding='cp932'):
+    if encoding not in ['cp932', 'utf8']:
+        print('csv encoding error and select cp932(SHIFT-JIS) or utf8.')
+        sys.exit
     entries = [entry[:3] for entry in entries]
-    with open(fname, 'w') as output_csv:
+    with open(fname, 'w', encoding=encoding) as output_csv:
         header = ['Name', 'From', 'To']
         writer = csv.writer(output_csv)
         writer.writerow(header)
@@ -97,8 +99,9 @@ def calcAmountTimeEntries(entries):
 
 def main():
     # 引数処理
+    args = sys.argv
     try:
-        which_day = sys.argv[1]
+        which_day = args[1]
     except IndexError:
         print('Please select today or yesterday.')
         sys.exit()
@@ -125,8 +128,13 @@ def main():
 
     output_file = dirpath + 'TimeLog_' + getDayText(which_day) + '.csv'
     
-    writeFile(output_file, entries)
+    # encoding指定がある場合は、関数に渡し、csvファイルを生成
+    try:
+        writeFile(output_file, entries, args[2])
+    except IndexError:
+        writeFile(output_file, entries)
     
+    # エントリー数と活動時間を出力
     num_entries = len(entries)
     amount_entry_time = '時間'.join(str(calcAmountTimeEntries(entries)).split(':')[:-1]) + '分'
     

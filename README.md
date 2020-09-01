@@ -21,8 +21,17 @@ Before you use this script, you need to change dirpath on 98th line in merge_tim
 
 # command args
 `python merge_timelog.py today`
+
 This option search log files in dirpath the period between today to today.
+
 `python merge_timelog.py yesterday`
+
 This option search log files in dirpath the period between yesterday to yesterday.
-`python merge_timelog.py yesterday`
+
+`python merge_timelog.py yesterday~`
+
 This option search log files in dirpath the period between yesterday to today.
+
+# Also set export csv's encoding, default is cp932(SHIFT-JIS), if you use utf8, set 2 args like below.
+
+`python merge_timelog.py yesterday utf8`
