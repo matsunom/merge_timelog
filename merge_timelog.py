@@ -69,6 +69,8 @@ def timeConvert_for_TrackingTime(time_text):
     # 24時間表記に変換する
     if noon == 'pm' and time_h != 12:
         time_h += 12
+    elif noon == 'am' and time_h == 12:
+        time_h -= 12
     time = str(time_h) + ":" + time_m
     return time
 
