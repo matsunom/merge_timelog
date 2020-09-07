@@ -14,6 +14,7 @@
 ---
 
 それぞれのアプリのレポートのダウンロード方法は次のようになります。
+
 [Toggl](https://toggl.com)
 
 Reports → Detailed → 期間の選択
