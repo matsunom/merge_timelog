@@ -1,39 +1,48 @@
-# merge_timelog
-This script to merge time Toggl detailed report and TrackingTime report per day.
-Input is multiple today's or yesterday's reports and output is a merged report formatted csv. Also we can get number of task entries and amount of time of entries.
+# スクリプトの説明
+このスクリプトは2つのアプリのレポートファイルを組み合わせ、タイムエントリを昇順に並び替えます。
+- Toggle detailed report
+- TrackingTime report
 
-This script treats one day report when yesterday or today.
+扱える期間は次のようになっています。
+- 昨日
+- 昨日~今日
+- 今日
 
-This script pick 'discription', 'start_time' and 'end_time' from Toggl detailed report.
-This script pick 'Task', 'From' and 'To' from TrackingTime report.
+そのためレポート(CSVファイル)を各アプリのウェブサイトからダウンロードする際は上記の日付をレポート範囲として選ぶ必要があります。
+またTrackingTimeでレポートを選択する際は、TASK・FROM・TO・DATEのカラムがレポートに含まれる必要があります。
 
-Name of log file.
-- Toggl_time_entries_2020-08-24_to_2020-08-30.csv
-- TrackingTime Aug 26,2020-Aug 26,2020 - 25523.csv
+---
 
-`python merge_timelog.py yesterday`
+それぞれのアプリのレポートのダウンロード方法は次のようになります。
+[https://toggl.com](トグル)
+Reports → Detailed → 期間の選択
 
-`17 entries. 8時間24分 work.`
+[https://trackingtime.co/](TrackingTime)
+Reports → TimeSheets → 期間の選択
 
-`file created: /Users/username/Downloads/TimeLog_2020-08-26.csv`
 
-Before you use this script, you need to change dirpath on 98th line in merge_timelog.py.
+ダウンロードしたレポートはダウンロードフィルダに入っている必要があります。スクリプトの159行目の'dirpath'で指定されたパスから読み取ります。そのため自らのusernameに書き換えて使用してください。
 
-# command args
-`python merge_timelog.py today`
+---
 
-This option search log files in dirpath the period between today to today.
+このスクリプトは3つの引数を持ちます。
+`python merge_timelog.py 期間 開始時刻 エンコーディング`
 
-`python merge_timelog.py yesterday`
+**期間**
+期間を省くことはできません。また以下の3つのみを受け付けます。
+- yesterday
+- yesterday~
+- today
 
-This option search log files in dirpath the period between yesterday to yesterday.
+yesterdayは昨日1日のみを扱います。昨日の日付で出力ファイルを作成します。
+yesterdayは昨日と今日の2日間を扱います。昨日の日付で出力ファイルを作成します。
+todayは今日1日のみを扱います。今日のの日付で出力ファイルを作成します。
 
-`python merge_timelog.py yesterday~`
+**開始時刻**
+任意で開始時刻を設定できます。開始時刻を整数(0~24)で設定すると、開始時刻以降の時間帯のみを出力ファイルに書き込みます。デフォルトでは最初に6時間以上エントリー間に開きがあった場合、6時間の開きがあった後のエントリーから出力ファイルに書き込みます。
 
-This option search log files in dirpath the period between yesterday to today like belows.
-- from yesterday to yesterday
-- from yesterday to today
+**エンコーディング**
+任意でエンコーディングを指定できます。選べるのはutf8とp932(SHIFT-JIS)となっています。デフォルトではutf8がしてれています。
 
-# Also set export csv's encoding, default is cp932(SHIFT-JIS), if you use utf8, set 2nd arg like below.
-
-`python merge_timelog.py yesterday utf8`
+# 出力の説明
+出力ファイルには2つのレポートファイルをマージし、開始時刻の昇順で並び替えられたものが書き込まれます。書き込まれるカラムはTask, From, Toの3項目となっています。時刻は24時間表記で書き込まれます。
