@@ -29,6 +29,7 @@ Reports → TimeSheets → 期間の選択
 `python merge_timelog.py 期間 開始時刻 エンコーディング`
 
 例)
+
 `python merge_timelog.py today`
 
 `python merge_timelog.py today 8 utf8`
