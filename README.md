@@ -29,6 +29,7 @@ Reports → TimeSheets → 期間の選択
 ---
 
 このスクリプトは3つの引数を持ちます。
+
 `python merge_timelog.py 期間 開始時刻 エンコーディング`
 
 例)
