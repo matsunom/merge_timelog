@@ -1,11 +1,7 @@
-
-import os
-import datetime
 import sys
+import datetime
 import glob
 import csv
-import pprint
-
 
 # 日時のテキストを取得する
 def getDayText(day):
@@ -81,7 +77,7 @@ def timeConvert_for_TrackingTime(time_text):
 
 def changeDay(entries, start_hour=None):
     # 引数による開始時刻の指定が無ければ、初めの6時間以上の開きがあった場合のエントリから取り出す
-    if not start_hour:
+    if start_hour == None:
         index_num = 0
         for i, entry in enumerate(entries):
             # 1回目は2つの比較ができないのでスキップ
@@ -96,11 +92,10 @@ def changeDay(entries, start_hour=None):
         return entries[index_num:]
     # 引数による開始時刻の指定がある場合は、その時刻よりあとのエントリを取り出す
     else:
-        start_hour = int(start_hour)
         index_num = 0
         for i, entry in enumerate(entries):
             start_time = int(entry[1].split(":")[0])
-            if start_time >=start_hour:
+            if start_time >= start_hour:
                 index_num = i
                 break
         return entries[index_num:]
@@ -145,7 +140,7 @@ def main():
         for arg in args[2:]:
             try:
                 start_hour = int(arg)
-                if not (0 <= start_hour and start_hour < 24):
+                if (start_hour < 0) or (24 <= start_hour):
                     print("開始時刻の指定は0から23までです。")
                     sys.exit()
             except ValueError:
