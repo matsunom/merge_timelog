@@ -75,6 +75,35 @@ def timeConvert_for_TrackingTime(time_text):
     time = str(time_h) + ":" + time_m
     return time
 
+def over24hour(entries):
+    this_day = entries[0][3].day
+    entries2 = []
+    num = 1
+    for entry in entries:
+        if entry[3].day != this_day:
+            start_time = str(int(entry[1].split(":")[0]) + 24) + ':' + str(entry[1].split(":")[1])
+            end_time = str(int(entry[2].split(":")[0]) + 24) + ':' + str(entry[2].split(":")[1])
+            entry[1] = start_time
+            entry[2] = end_time
+        entries2.append(entry[:3])
+    return entries2
+
+def formatChange(entries):
+    entries2 = []
+    for entry in entries:
+        start_hour, start_minute = entry[1].split(":")
+        end_hour, end_minute = entry[2].split(":")
+        if len(start_hour) < 2:
+            start_hour = str(0) + start_hour
+            start_time = start_hour + ":" + start_minute
+            entry[1] = start_time
+        if len(end_hour) < 2:
+            end_hour = str(0) + end_hour
+            end_time = end_hour + ":" + end_minute
+            entry[2] = end_time
+        entries2.append(entry)
+    return entries2
+
 def changeDay(entries, start_hour=None):
     # 引数による開始時刻の指定が無ければ、初めの6時間以上の開きがあった場合のエントリから取り出す
     if start_hour == None:
@@ -100,17 +129,6 @@ def changeDay(entries, start_hour=None):
                 break
         return entries[index_num:]
 
-def writeFile(fname, entries, encoding):
-    entries = [entry[:3] for entry in entries]
-    try:
-        with open(fname, 'w', encoding=encoding) as output_csv:
-            header = ['Name', 'From', 'To']
-            writer = csv.writer(output_csv)
-            writer.writerow(header)
-            writer.writerows(entries)
-    except LookupError:
-        sys.exit()
-
 def calcAmountTimeEntries(entries):
     amount_entry_time = datetime.timedelta(days=0, hours=0, minutes=0) # 初期化
     for entry in entries:
@@ -124,6 +142,16 @@ def calcAmountTimeEntries(entries):
             duration = end_time - start_time
         amount_entry_time += duration
     return amount_entry_time
+
+def writeFile(fname, entries, encoding):
+    try:
+        with open(fname, 'w', encoding=encoding) as output_csv:
+            header = ['Name', 'From', 'To']
+            writer = csv.writer(output_csv)
+            writer.writerow(header)
+            writer.writerows(entries)
+    except LookupError:
+        sys.exit()
 
 def main():
     # 引数処理
@@ -166,22 +194,25 @@ def main():
     entries = []
     for fpath in fpaths:
         entries.extend(readFile(fpath))
-
+    
+    # 24時以降を25時のようにする
+    entries = over24hour(entries)
+    # 1桁の数字は2桁にする
+    entries = formatChange(entries)
     # エントリーを from をキーにして並び替える
-    entries.sort(key=lambda x: (x[3], x[1]))
-
+    entries.sort(key=lambda x: x[1])
     # 1日の開始時刻フィルダーをかける
     entries = changeDay(entries, start_hour)
+
+    # エントリー数と活動時間を出力
+    num_entries = len(entries)
+    amount_entry_time = '時間'.join(str(calcAmountTimeEntries(entries)).split(':')[:-1]) + '分'
+    print("{} entries. {} work.".format(num_entries, amount_entry_time))
 
     # ファイル名の生成
     output_file = dirpath + 'TimeLog_' + getDayText(which_day) + '.csv'
     #csvファイルを生成
     writeFile(output_file, entries, encoding)
-    
-    # エントリー数と活動時間を出力
-    num_entries = len(entries)
-    amount_entry_time = '時間'.join(str(calcAmountTimeEntries(entries)).split(':')[:-1]) + '分'
-    print("{} entries. {} work.".format(num_entries, amount_entry_time))
     print("file created: {}".format(output_file))
 
 if __name__ == '__main__':
