@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import datetime
 import glob
@@ -106,8 +107,8 @@ def formatChange(entries):
 
 def changeDay(entries, start_hour=None):
     # 引数による開始時刻の指定が無ければ、初めの6時間以上の開きがあった場合のエントリから取り出す
+    index_num = []
     if start_hour == None:
-        index_num = 0
         for i, entry in enumerate(entries):
             # 1回目は2つの比較ができないのでスキップ
             if i == 0:
@@ -115,19 +116,21 @@ def changeDay(entries, start_hour=None):
                 continue
             start_time2 = int(entry[1].split(":")[0])
             if (start_time2 - start_time1) >= 6:
-                index_num = i
-                break
+                index_num.append(i)
+                # index_num = i
+                # break
             start_time1 = start_time2
-        return entries[index_num:]
-    # 引数による開始時刻の指定がある場合は、その時刻よりあとのエントリを取り出す
     else:
-        index_num = 0
         for i, entry in enumerate(entries):
             start_time = int(entry[1].split(":")[0])
             if start_time >= start_hour:
-                index_num = i
+                index_num.append(i)
                 break
-        return entries[index_num:]
+    # 引数による開始時刻の指定がある場合は、その時刻よりあとのエントリを取り出す
+    if len(index_num) >= 2:
+        return entries[index_num[0]:index_num[-1]]
+    else:
+        return entries[index_num[0]:]
 
 def calcAmountTimeEntries(entries):
     amount_entry_time = datetime.timedelta(days=0, hours=0, minutes=0) # 初期化
@@ -179,7 +182,7 @@ def main():
 
     # ファイル名の取得
     fnames = getFname(which_day)
-    dirpath = '/Users/username/Downloads/'
+    dirpath = '/Users/matsunom/Downloads/'
     matchpath = dirpath + '*.csv'
     csv_names = glob.glob(matchpath)
     fpaths = []
@@ -203,6 +206,8 @@ def main():
     entries.sort(key=lambda x: x[1])
     # 1日の開始時刻フィルダーをかける
     entries = changeDay(entries, start_hour)
+
+    print(entries)
 
     # エントリー数と活動時間を出力
     num_entries = len(entries)
