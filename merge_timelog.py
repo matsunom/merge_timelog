@@ -182,7 +182,7 @@ def main():
 
     # ファイル名の取得
     fnames = getFname(which_day)
-    dirpath = '/Users/matsunom/Downloads/'
+    dirpath = '/Users/username/Downloads/'
     matchpath = dirpath + '*.csv'
     csv_names = glob.glob(matchpath)
     fpaths = []
@@ -206,8 +206,6 @@ def main():
     entries.sort(key=lambda x: x[1])
     # 1日の開始時刻フィルダーをかける
     entries = changeDay(entries, start_hour)
-
-    print(entries)
 
     # エントリー数と活動時間を出力
     num_entries = len(entries)
