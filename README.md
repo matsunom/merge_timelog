@@ -1,7 +1,7 @@
 ### 1. スクリプトの説明
 このスクリプトは下記の2つのアプリのレポートファイルを組み合わせ、タイムエントリを昇順に並び替えます。
-- Toggle detailed report
-- TrackingTime report
+- Toggle Track Detailed Report
+- TrackingTime Report
 
 扱える期間は次のようになっています。
 - 昨日
@@ -24,9 +24,11 @@ Reports → Detailed → 期間の選択
 Reports → TimeSheets → 期間の選択
 
 
-ダウンロードしたレポートはダウンロードフィルダに入っている必要があります。スクリプトの185行目の'dirpath'で指定されたパスから読み取ります。そのため自らのusernameに書き換えて使用してください。
+ダウンロードしたレポートはダウンロードフィルダに入っている必要があります。スクリプトの267行目の'dirpath'で指定されたパスから読み取ります。そのため自らのusernameに書き換えて使用してください。
 
 ---
+
+**pythonではなくpython3で実行してください。**
 
 このスクリプトは3つの引数を持ちます。
 
