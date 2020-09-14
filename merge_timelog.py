@@ -113,15 +113,26 @@ def over24hour(entries):
     entries2 = []
     num = 1
     for entry in entries:
-        if entry[3].day != this_day or entry[4].day != this_day:
-            start_time = str(int(entry[1].split(":")[0]) + 24) + ':' + str(entry[1].split(":")[1])
-            end_time = str(int(entry[2].split(":")[0]) + 24) + ':' + str(entry[2].split(":")[1])
-            entry[1] = start_time
-            entry[2] = end_time
-        # TrackingTimeのログはEnd Dateが存在しないため、Start Dateで穴埋めされている。そのための例外処理
-        elif entry[3].day == this_day and int(entry[2].split(":")[0]) == 0:
-            end_time = str(int(entry[2].split(":")[0]) + 24) + ':' + str(entry[2].split(":")[1])
-            entry[2] = end_time
+        start_time = int(entry[1].split(":")[0])
+        end_time = int(entry[2].split(":")[0]) 
+        # 日付が同じ場合
+        if entry[3].day == this_day:
+            # 日付が変わった場合、カウントを継続させる
+            if entry[3].day != entry[4].day and (end_time - start_time < 0):
+                end_time = end_time + 24
+             # TrackingTimeのログはEnd Dateが存在しないため、Start Dateで穴埋めされている。そのための例外処理
+            if end_time == 0:
+                end_time = end_time + 24
+
+        # 日付違う場合
+        else:
+            start_time = int(entry[1].split(":")[0]) + 24
+            end_time = int(entry[2].split(":")[0]) + 24
+            # 日付が変わった場合、カウントを継続させる
+            if end_time - start_time < 0:
+                end_time = end_time + 24
+        entry[1] = str(start_time) + ":" + entry[1].split(":")[1]
+        entry[2] = str(end_time) + ":" + entry[2].split(":")[1]
         entries2.append(entry[:3])
     return entries2
 
@@ -203,6 +214,19 @@ def timeFilter(entries, start_hour=None):
         else:
             return entries[index_start_hour:]
 
+def convertOvertime(entries):
+    if int(entries[0][1].split(":")[0]) >= 24:
+        entries2 = []
+        for entry in entries:
+            start_time = int(entry[1].split(':')[0])
+            end_time = int(entry[2].split(':')[1])
+            entry[1] = start_time -24
+            entry[2] = end_time - 24
+            entries2.append(entry)
+        entries = entries2
+    return entries
+
+
 
 def calcAmountTimeEntries(entries):
     amount_entry_time = datetime.timedelta(days=0, hours=0, minutes=0) # 初期化
@@ -268,9 +292,6 @@ def main():
     matchpath = dirpath + '*.csv'
     csv_names = glob.glob(matchpath)
 
-    # print(fnames)
-    # print(csv_names)
-
     fpaths = []
     for fname in fnames:
         for csv_name in csv_names:
@@ -279,8 +300,6 @@ def main():
     if not fpaths:
         print('No Time Record Files in ~/Downloads ')
         sys.exit()
-    
-    # print(fpaths)
 
     entries = []
     for fpath in fpaths:
@@ -293,8 +312,6 @@ def main():
     # エントリーを from をキーにして並び替える
     entries.sort(key=lambda x: x[1])
     # 1日の開始時刻フィルダーをかける
-    # print(entries)
-    # timeFilter(entries)
     entries = timeFilter(entries, start_hour)
 
     # エントリー数と活動時間を出力
