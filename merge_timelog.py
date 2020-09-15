@@ -288,17 +288,17 @@ def main():
         fnames = getFname(which_day, t_day)
     else:
         fnames = getFname(which_day)
-    dirpath = '/Users/matsunom/Downloads/'
-    matchpath = dirpath + '*.csv'
+    input_dirpath = './input/'
+    matchpath = input_dirpath + '*.csv'
     csv_names = glob.glob(matchpath)
 
     fpaths = []
     for fname in fnames:
         for csv_name in csv_names:
-            if csv_name.startswith(dirpath + fname):
+            if csv_name.startswith(input_dirpath + fname):
                 fpaths.append(csv_name)
     if not fpaths:
-        print('No Time Record Files in ~/Downloads ')
+        print('No Time Record Files in ./input/ ')
         sys.exit()
 
     entries = []
@@ -320,10 +320,11 @@ def main():
     print("{} entries. {} work.".format(num_entries, amount_entry_time))
 
     # ファイル名の生成
+    output_dirpath = './output/'
     if which_day == '-t':
-        output_file = dirpath + 'TimeLog_' + getDayText(which_day, t_day) + '.csv'
+        output_file = output_dirpath + 'TimeLog_' + getDayText(which_day, t_day) + '.csv'
     else:
-        output_file = dirpath + 'TimeLog_' + getDayText(which_day) + '.csv'
+        output_file = output_dirpath + 'TimeLog_' + getDayText(which_day) + '.csv'
     # csvファイルを生成
     writeFile(output_file, entries, encoding)
     print("file created: {}".format(output_file))
