@@ -121,8 +121,9 @@ def over24hour(entries):
             if entry[3].day != entry[4].day and (end_time - start_time < 0):
                 end_time = end_time + 24
              # TrackingTimeのログはEnd Dateが存在しないため、Start Dateで穴埋めされている。そのための例外処理
-            if end_time == 0:
-                end_time = end_time + 24
+            if not start_time == 0:
+                if end_time == 0:
+                    end_time = end_time + 24
 
         # 日付違う場合
         else:
